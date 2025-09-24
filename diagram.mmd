@@ -1,0 +1,124 @@
+erDiagram
+    %% ER Diagram - Base de Données Relationnelle Bar Karaoké Paris 9ème
+    
+    %% ===== TABLE RESERVATIONS =====
+    RESERVATIONS {
+        bigint id PK "Auto-increment primary key"
+        varchar customer_name "Customer full name (NOT NULL)"
+        varchar customer_email "Customer email address (NOT NULL)"
+        varchar customer_phone "Customer phone number (NOT NULL)"
+        date reservation_date "Date of reservation (NOT NULL)"
+        time reservation_time "Time of reservation (NOT NULL, 22:30-06:00)"
+        int number_of_guests "Number of guests (NOT NULL, CHECK > 0)"
+        varchar table_preference "Table preference (bar, terrasse, fond, NULL)"
+        text special_requests "Special requests from customer (NULL)"
+        varchar status "Reservation status (NOT NULL, DEFAULT 'pending')"
+        timestamp created_at "Creation timestamp (DEFAULT CURRENT_TIMESTAMP)"
+        timestamp updated_at "Last update timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE EVENTS =====
+    EVENTS {
+        bigint id PK "Auto-increment primary key"
+        varchar title "Event title (NOT NULL)"
+        text description "Event description (NULL)"
+        date event_date "Date of the event (NOT NULL)"
+        time start_time "Event start time (NOT NULL)"
+        time end_time "Event end time (NULL)"
+        varchar image_url "Event image URL (NULL)"
+        varchar event_type "Type of event (theme_night, contest, special, NULL)"
+        int max_capacity "Maximum capacity (NULL)"
+        int current_attendees "Current number of attendees (DEFAULT 0)"
+        boolean is_active "Event is active (DEFAULT true)"
+        timestamp created_at "Creation timestamp (DEFAULT CURRENT_TIMESTAMP)"
+        timestamp updated_at "Last update timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE SONGS =====
+    SONGS {
+        bigint id PK "Auto-increment primary key"
+        varchar title "Song title (NOT NULL)"
+        varchar artist "Artist name (NOT NULL)"
+        varchar genre "Music genre (pop, rock, chanson_francaise, NULL)"
+        varchar language "Song language (NOT NULL, DEFAULT 'French')"
+        int duration "Duration in seconds (NULL)"
+        boolean is_available "Song is available for karaoke (DEFAULT true)"
+        int popularity "Popularity score 0-100 (NULL)"
+        int play_count "Number of times played (DEFAULT 0)"
+        timestamp last_played "Last time this song was played (NULL)"
+        json tags "Search tags array (NULL)"
+        timestamp created_at "Creation timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE CONTACT_MESSAGES =====
+    CONTACT_MESSAGES {
+        bigint id PK "Auto-increment primary key"
+        varchar sender_name "Sender full name (NOT NULL)"
+        varchar sender_email "Sender email address (NOT NULL)"
+        varchar subject "Message subject (NULL)"
+        text message "Message content (NOT NULL)"
+        varchar message_type "Type of message (general, complaint, suggestion, reservation, NULL)"
+        boolean is_read "Message has been read by admin (DEFAULT false)"
+        varchar priority "Message priority (low, medium, high, NULL)"
+        text admin_response "Admin response (NULL)"
+        timestamp responded_at "Response timestamp (NULL)"
+        varchar ip_address "Sender IP address for spam tracking (NULL)"
+        text user_agent "Browser user agent for analytics (NULL)"
+        timestamp created_at "Creation timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE ADMIN_USERS =====
+    ADMIN_USERS {
+        bigint id PK "Auto-increment primary key"
+        varchar username "Admin username (NOT NULL, UNIQUE)"
+        varchar email "Admin email address (NOT NULL, UNIQUE)"
+        varchar password_hash "Hashed password (NOT NULL)"
+        varchar role "Admin role (admin, manager, staff, NOT NULL)"
+        json permissions "Permissions array (NOT NULL)"
+        boolean is_active "Account is active (DEFAULT true)"
+        timestamp last_login "Last login timestamp (NULL)"
+        bigint created_by FK "ID of admin who created this account (NULL)"
+        timestamp created_at "Creation timestamp (DEFAULT CURRENT_TIMESTAMP)"
+        timestamp updated_at "Last update timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE RESERVATION_LOGS =====
+    RESERVATION_LOGS {
+        bigint id PK "Auto-increment primary key"
+        bigint reservation_id FK "Reference to reservation (NOT NULL)"
+        varchar action "Action performed (created, confirmed, cancelled, updated)"
+        text old_values "Previous values before change (JSON, NULL)"
+        text new_values "New values after change (JSON, NULL)"
+        bigint performed_by FK "Admin who performed the action (NULL)"
+        varchar ip_address "IP address of the action performer (NULL)"
+        timestamp created_at "Action timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== TABLE EVENT_ATTENDEES =====
+    EVENT_ATTENDEES {
+        bigint id PK "Auto-increment primary key"
+        bigint event_id FK "Reference to event (NOT NULL)"
+        bigint reservation_id FK "Reference to reservation (NULL, if attending via reservation)"
+        varchar attendee_name "Name of attendee (NOT NULL)"
+        varchar attendee_email "Email of attendee (NOT NULL)"
+        varchar attendee_phone "Phone of attendee (NULL)"
+        int number_of_people "Number of people in this registration (DEFAULT 1)"
+        varchar registration_source "How they registered (website, phone, walk_in)"
+        timestamp registered_at "Registration timestamp (DEFAULT CURRENT_TIMESTAMP)"
+    }
+    
+    %% ===== RELATIONSHIPS =====
+    
+    %% Admin user self-reference
+    ADMIN_USERS ||--o{ ADMIN_USERS : "created_by"
+    
+    %% Reservation logs
+    RESERVATIONS ||--o{ RESERVATION_LOGS : "has_logs"
+    ADMIN_USERS ||--o{ RESERVATION_LOGS : "performed_by"
+    
+    %% Event attendees
+    EVENTS ||--o{ EVENT_ATTENDEES : "has_attendees"
+    RESERVATIONS ||--o{ EVENT_ATTENDEES : "may_attend_via_reservation"
+    
+    %% Note: No direct relationships between main entities
+    %% This allows for flexible, independent management of each domain
