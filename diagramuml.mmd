@@ -1,0 +1,353 @@
+classDiagram
+    %% Diagramme UML - Composants Front-end Bar Karaoké
+    
+    %% ===== MAIN APPLICATION COMPONENT =====
+    class App {
+        -router: Router
+        -globalState: GlobalState
+        -themeProvider: ThemeProvider
+        -errorBoundary: ErrorBoundary
+        
+        +initializeApp(): void
+        +handleRouteChange(route: String): void
+        +setGlobalError(error: Error): void
+        +updateGlobalState(state: Object): void
+    }
+    
+    %% ===== LAYOUT COMPONENTS =====
+    class Header {
+        -logoUrl: String
+        -navigationItems: Array~MenuItem~
+        -isMobileMenuOpen: Boolean
+        -activeSection: String
+        
+        +toggleMobileMenu(): void
+        +scrollToSection(sectionId: String): void
+        +highlightActiveSection(section: String): void
+        +renderNavigation(): JSX
+    }
+    
+    class Footer {
+        -businessHours: BusinessHours
+        -contactInfo: ContactInfo
+        -socialLinks: Array~SocialLink~
+        
+        +renderBusinessHours(): JSX
+        +renderContactInfo(): JSX
+        +renderSocialLinks(): JSX
+    }
+    
+    %% ===== PAGE COMPONENTS =====
+    class HomePage {
+        -sections: Array~Section~
+        -isLoading: Boolean
+        -pageData: PageData
+        
+        +loadPageData(): Promise~void~
+        +initScrollAnimations(): void
+        +handleSectionVisibility(section: String): void
+        +renderSections(): JSX
+    }
+    
+    class HeroSection {
+        -backgroundVideo: String
+        -heroContent: HeroContent
+        -ctaButtons: Array~Button~
+        -isVideoLoaded: Boolean
+        
+        +loadBackgroundVideo(): Promise~void~
+        +handleCTAClick(action: String): void
+        +renderHeroContent(): JSX
+        +playVideo(): void
+    }
+    
+    class AboutSection {
+        -barInfo: BarInfo
+        -images: Array~Image~
+        -features: Array~Feature~
+        
+        +renderBarDescription(): JSX
+        +renderFeatures(): JSX
+        +renderImageGallery(): JSX
+    }
+    
+    class ServicesSection {
+        -services: Array~Service~
+        -drinkMenu: DrinkMenu
+        -selectedCategory: String
+        -isMenuVisible: Boolean
+        
+        +toggleMenuVisibility(): void
+        +filterByCategory(category: String): void
+        +renderServices(): JSX
+        +renderDrinkMenu(): JSX
+    }
+    
+    %% ===== FEATURE COMPONENTS =====
+    class EventsSection {
+        -events: Array~Event~
+        -filteredEvents: Array~Event~
+        -selectedEvent: Event
+        -filters: EventFilters
+        -isLoading: Boolean
+        
+        +fetchEvents(): Promise~Array~Event~~
+        +filterEvents(criteria: FilterCriteria): void
+        +selectEvent(eventId: String): void
+        +renderEventList(): JSX
+        +renderEventModal(): JSX
+    }
+    
+    class SongCatalogSection {
+        -songs: Array~Song~
+        -filteredSongs: Array~Song~
+        -searchQuery: String
+        -filters: SongFilters
+        -pagination: Pagination
+        -isLoading: Boolean
+        
+        +fetchSongs(): Promise~Array~Song~~
+        +searchSongs(query: String): void
+        +filterSongs(filters: SongFilters): void
+        +loadMoreSongs(): void
+        +renderSongList(): JSX
+        +renderSearchInterface(): JSX
+    }
+    
+    class ReservationSection {
+        -reservationForm: ReservationForm
+        -availableSlots: Array~TimeSlot~
+        -isFormVisible: Boolean
+        
+        +toggleFormVisibility(): void
+        +fetchAvailableSlots(date: Date): Promise~Array~TimeSlot~~
+        +renderReservationForm(): JSX
+        +renderAvailableSlots(): JSX
+    }
+    
+    class ContactSection {
+        -contactForm: ContactForm
+        -contactInfo: ContactInfo
+        -mapComponent: GoogleMap
+        -businessHours: BusinessHours
+        
+        +renderContactForm(): JSX
+        +renderContactInfo(): JSX
+        +renderMap(): JSX
+        +renderBusinessHours(): JSX
+    }
+    
+    %% ===== FORM COMPONENTS =====
+    class ReservationForm {
+        -formData: ReservationData
+        -errors: ValidationErrors
+        -isSubmitting: Boolean
+        -validationRules: ValidationRules
+        
+        +validateField(fieldName: String, value: Any): Boolean
+        +validateForm(): Boolean
+        +submitReservation(): Promise~void~
+        +resetForm(): void
+        +handleInputChange(field: String, value: Any): void
+        +renderFormFields(): JSX
+        +renderErrorMessages(): JSX
+    }
+    
+    class ContactForm {
+        -formData: ContactData
+        -errors: ValidationErrors
+        -isSubmitting: Boolean
+        -messageTypes: Array~String~
+        
+        +validateForm(): Boolean
+        +submitMessage(): Promise~void~
+        +resetForm(): void
+        +handleInputChange(field: String, value: Any): void
+        +renderFormFields(): JSX
+    }
+    
+    %% ===== UI COMPONENTS =====
+    class Button {
+        -text: String
+        -type: ButtonType
+        -isLoading: Boolean
+        -isDisabled: Boolean
+        -onClick: Function
+        -variant: String
+        
+        +handleClick(): void
+        +setLoadingState(loading: Boolean): void
+        +setDisabledState(disabled: Boolean): void
+        +render(): JSX
+    }
+    
+    class Modal {
+        -isOpen: Boolean
+        -title: String
+        -content: ReactNode
+        -onClose: Function
+        -size: ModalSize
+        
+        +open(content: ReactNode): void
+        +close(): void
+        +handleOverlayClick(): void
+        +handleEscapeKey(): void
+        +render(): JSX
+    }
+    
+    class SearchInput {
+        -value: String
+        -placeholder: String
+        -suggestions: Array~String~
+        -onSearch: Function
+        -debounceTime: Number
+        
+        +handleInputChange(value: String): void
+        +handleSearch(): void
+        +showSuggestions(): void
+        +hideSuggestions(): void
+        +selectSuggestion(suggestion: String): void
+        +render(): JSX
+    }
+    
+    class Filter {
+        -options: Array~FilterOption~
+        -selectedValues: Array~String~
+        -onFilterChange: Function
+        -filterType: FilterType
+        
+        +applyFilter(value: String): void
+        +removeFilter(value: String): void
+        +clearAllFilters(): void
+        +render(): JSX
+    }
+    
+    class Pagination {
+        -currentPage: Number
+        -totalPages: Number
+        -itemsPerPage: Number
+        -onPageChange: Function
+        
+        +goToPage(page: Number): void
+        +goToNextPage(): void
+        +goToPreviousPage(): void
+        +render(): JSX
+    }
+    
+    class LoadingSpinner {
+        -size: SpinnerSize
+        -color: String
+        -isVisible: Boolean
+        
+        +show(): void
+        +hide(): void
+        +render(): JSX
+    }
+    
+    %% ===== UTILITY COMPONENTS =====
+    class ErrorBoundary {
+        -hasError: Boolean
+        -errorInfo: ErrorInfo
+        
+        +componentDidCatch(error: Error, errorInfo: ErrorInfo): void
+        +render(): JSX
+    }
+    
+    class GoogleMap {
+        -apiKey: String
+        -center: Coordinates
+        -zoom: Number
+        -markers: Array~Marker~
+        -isLoaded: Boolean
+        
+        +loadMap(): Promise~void~
+        +addMarker(marker: Marker): void
+        +centerOnLocation(coordinates: Coordinates): void
+        +render(): JSX
+    }
+    
+    %% ===== SERVICE COMPONENTS =====
+    class ApiService {
+        -baseURL: String
+        -headers: Object
+        -timeout: Number
+        
+        +get(endpoint: String): Promise~Response~
+        +post(endpoint: String, data: Object): Promise~Response~
+        +put(endpoint: String, data: Object): Promise~Response~
+        +delete(endpoint: String): Promise~Response~
+        +handleError(error: Error): void
+    }
+    
+    class ValidationService {
+        -rules: ValidationRules
+        
+        +validateEmail(email: String): Boolean
+        +validatePhone(phone: String): Boolean
+        +validateDate(date: String): Boolean
+        +validateTime(time: String): Boolean
+        +validateRequired(value: Any): Boolean
+        +validateReservation(data: ReservationData): ValidationResult
+        +validateContact(data: ContactData): ValidationResult
+    }
+    
+    class NotificationService {
+        -notifications: Array~Notification~
+        -position: NotificationPosition
+        
+        +showSuccess(message: String): void
+        +showError(message: String): void
+        +showWarning(message: String): void
+        +showInfo(message: String): void
+        +clearAll(): void
+        +render(): JSX
+    }
+    
+    %% ===== COMPONENT RELATIONSHIPS =====
+    
+    %% App contains main layout
+    App --> Header : contains
+    App --> HomePage : contains  
+    App --> Footer : contains
+    App --> ErrorBoundary : uses
+    App --> NotificationService : uses
+    
+    %% HomePage contains all sections
+    HomePage --> HeroSection : contains
+    HomePage --> AboutSection : contains
+    HomePage --> ServicesSection : contains
+    HomePage --> EventsSection : contains
+    HomePage --> SongCatalogSection : contains
+    HomePage --> ReservationSection : contains
+    HomePage --> ContactSection : contains
+    
+    %% Section components contain forms
+    ReservationSection --> ReservationForm : contains
+    ContactSection --> ContactForm : contains
+    ContactSection --> GoogleMap : contains
+    
+    %% Components use UI elements
+    EventsSection --> Modal : uses
+    EventsSection --> Button : uses
+    EventsSection --> Filter : uses
+    
+    SongCatalogSection --> SearchInput : uses
+    SongCatalogSection --> Filter : uses
+    SongCatalogSection --> Pagination : uses
+    SongCatalogSection --> LoadingSpinner : uses
+    
+    ReservationForm --> Button : uses
+    ReservationForm --> LoadingSpinner : uses
+    ContactForm --> Button : uses
+    
+    %% Components use services
+    ReservationForm --> ApiService : uses
+    ReservationForm --> ValidationService : uses
+    ContactForm --> ApiService : uses
+    ContactForm --> ValidationService : uses
+    EventsSection --> ApiService : uses
+    SongCatalogSection --> ApiService : uses
+    
+    %% Global services
+    App --> ApiService : configures
+    App --> ValidationService : provides
